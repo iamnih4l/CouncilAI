@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/purity */
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -21,7 +22,7 @@ export default function BrainModel({ consensusResult }: BrainModelProps) {
       const phi = Math.acos((Math.random() * 2) - 1);
       const r = 2.5 + Math.random() * 0.4;
 
-      let x = r * Math.sin(phi) * Math.cos(theta);
+      const x = r * Math.sin(phi) * Math.cos(theta);
       let y = r * Math.sin(phi) * Math.sin(theta);
       let z = r * Math.cos(phi);
 

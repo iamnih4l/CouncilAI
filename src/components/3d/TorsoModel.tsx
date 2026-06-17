@@ -1,13 +1,15 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import type { CouncilConsensusResult } from '../../services/inference/types';
 
-export default function TorsoModel() {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export default function TorsoModel({ consensusResult: _consensusResult }: { consensusResult?: CouncilConsensusResult | null }) {
   const pointsRef = useRef<THREE.Points>(null);
   const scanLineRef = useRef<THREE.Mesh>(null);
 
   // Generate a point cloud that vaguely resembles an abdominal/torso region
-  const particles = useMemo(() => {
+  const [particles] = useState(() => {
     const p = [];
     for (let i = 0; i < 8000; i++) {
       const height = (Math.random() * 6) - 3; // From y=-3 to 3
@@ -17,14 +19,14 @@ export default function TorsoModel() {
       const radiusBase = 1.8 + Math.abs(height) * 0.2; 
       const r = radiusBase * Math.sqrt(Math.random());
 
-      let x = r * Math.cos(angle) * 1.5; // Wider in X
-      let y = height;
-      let z = r * Math.sin(angle) * 0.8; // Narrower in Z (depth)
+      const x = r * Math.cos(angle) * 1.5; // Wider in X
+      const y = height;
+      const z = r * Math.sin(angle) * 0.8; // Narrower in Z (depth)
 
       p.push(x, y, z);
     }
     return new Float32Array(p);
-  }, []);
+  });
 
   useFrame((state) => {
     const time = state.clock.getElapsedTime();

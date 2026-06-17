@@ -37,6 +37,23 @@ export function UploadModal({ isOpen, onClose, defaultModality = 'mri' }: Upload
   };
 
   const handleFile = (selectedFile: File) => {
+    // 1. Size Validation (Max 50MB)
+    const MAX_SIZE = 50 * 1024 * 1024;
+    if (selectedFile.size > MAX_SIZE) {
+      toast.error('File size too large', { description: 'Maximum allowed size is 50MB for security reasons.' });
+      return;
+    }
+
+    // 2. Type/Extension Validation
+    const validExtensions = ['.dcm', '.nii', '.nrrd', '.png', '.jpg', '.jpeg'];
+    const validMimes = ['image/png', 'image/jpeg', 'application/dicom'];
+    const fileExtension = selectedFile.name.substring(selectedFile.name.lastIndexOf('.')).toLowerCase();
+    
+    if (!validExtensions.includes(fileExtension) && !validMimes.includes(selectedFile.type)) {
+      toast.error('Invalid file type', { description: 'Please upload a valid DICOM, NIfTI, or medical imaging file.' });
+      return;
+    }
+
     setFile(selectedFile);
   };
 
@@ -51,19 +68,13 @@ export function UploadModal({ isOpen, onClose, defaultModality = 'mri' }: Upload
           clearInterval(interval);
           setUploading(false);
           
-          if (modality === 'mri') {
-            toast.success('Scan Uploaded: Executing Council AI Analysis', {
-              description: `${file.name} sent to Density, Attention, and Swin Transformer models.`,
-            });
-            // Queue the file in the singleton engine
-            diagnosticEngine.processImage(file).catch(console.error);
-            // Navigate to the MRI analysis page
-            navigate('/mri');
-          } else {
-            toast.success('Scan uploaded successfully', {
-              description: `${file.name} has been sent to the processing queue.`,
-            });
-          }
+          const nextRoute = modality === 'mri' ? '/mri' : modality === 'ct' ? '/ct' : '/xray';
+          toast.success('Scan Uploaded: Executing Council AI Analysis', {
+            description: `${file.name} sent to the diagnostic pipeline.`,
+          });
+          
+          diagnosticEngine.processImage(file).catch(console.error);
+          navigate(nextRoute);
 
           setTimeout(() => {
             onClose();

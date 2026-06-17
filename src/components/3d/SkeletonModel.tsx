@@ -1,14 +1,16 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import type { CouncilConsensusResult } from '../../services/inference/types';
 
-export default function SkeletonModel() {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export default function SkeletonModel({ consensusResult: _consensusResult }: { consensusResult?: CouncilConsensusResult | null }) {
   const pointsRef = useRef<THREE.Points>(null);
   const anomalyRef = useRef<THREE.Points>(null);
   const scanLineRef = useRef<THREE.Mesh>(null);
 
   // Generate a point cloud resembling a Tibia bone
-  const particles = useMemo(() => {
+  const [particles] = useState(() => {
     const p = [];
     for (let i = 0; i < 4000; i++) {
       const height = (Math.random() * 6) - 3; // Long bone
@@ -18,17 +20,17 @@ export default function SkeletonModel() {
       const radiusBase = 0.4 + Math.pow(Math.abs(height) / 3, 2) * 0.6; 
       const r = radiusBase * Math.sqrt(Math.random());
 
-      let x = r * Math.cos(angle);
-      let y = height;
-      let z = r * Math.sin(angle);
+      const x = r * Math.cos(angle);
+      const y = height;
+      const z = r * Math.sin(angle);
 
       p.push(x, y, z);
     }
     return new Float32Array(p);
-  }, []);
+  });
 
   // Hairline fracture anomaly on the distal 1/3
-  const anomalyParticles = useMemo(() => {
+  const [anomalyParticles] = useState(() => {
     const p = [];
     // Distal 1/3 is near the bottom
     const centerY = -1.5;
@@ -48,7 +50,7 @@ export default function SkeletonModel() {
       }
     }
     return new Float32Array(p);
-  }, []);
+  });
 
   useFrame((state) => {
     const time = state.clock.getElapsedTime();

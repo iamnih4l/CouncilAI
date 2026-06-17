@@ -1,26 +1,35 @@
-# Medical Test Images (Brain MRI)
+# CouncilMed MRI Test Resources
 
-Use these publicly available medical images to test the CouncilMed Diagnostic Engine. These links point to high-quality brain scans representing various conditions.
+This document provides links to medical-grade brain MRI images that can be used to test the CouncilMed multi-model diagnostic pipeline.
 
-### 📋 How to Use
-1. Copy a URL from the list below.
-2. In the **MRI Analysis** page, click "Upload MRI".
-3. Paste the URL directly into the file dialog if your OS supports it, or download the image first and then upload it.
+## Direct Image Links (For Quick Testing)
 
----
+Use these URLs in the "Upload MRI" section of the application.
 
-### 🧠 Sample Dataset
+| Image Type | Description | URL |
+| :--- | :--- | :--- |
+| **T1-Weighted** | Normal brain anatomy, high structural detail. | [Sample T1](https://mrimaster.com/images/anatomy/brain/mri%20brain%20axial%20anatomy%20(1).jpg) |
+| **T2-Weighted** | Good for detecting edema and CSF. | [Sample T2](https://mrimaster.com/images/anatomy/brain/mri%20brain%20axial%20t2%20(1).jpg) |
+| **FLAIR** | Suppresses CSF, excellent for lesion detection. | [Sample FLAIR](https://mrimaster.com/images/pathology/brain/flair%20brain%20(1).jpg) |
+| **Glioblastoma** | High-grade glioma (Grade IV). | [Pathology Sample](https://radiopaedia.org/uploads/radio/0000/0173/GBM-axial-T1-contrast.jpg) |
+| **Meningioma** | Extra-axial tumor (Grade I). | [Pathology Sample 2](https://radiopaedia.org/uploads/radio/0000/0174/Meningioma-axial-T1-contrast.jpg) |
 
-| Image Type | Description | URL | Source |
-| :--- | :--- | :--- | :--- |
-| **Healthy Brain** | Normal T1-weighted axial slice. | [Direct Link](https://upload.wikimedia.org/wikipedia/commons/b/b3/Normal_brain_MRI.jpg) | Wikimedia Commons |
-| **Glioblastoma** | T1-weighted MRI with glioblastoma multiforme. | [Direct Link](https://upload.wikimedia.org/wikipedia/commons/5/5f/T1w_MRI_of_a_human_brain_with_glioblastoma_multiforme.jpg) | Radiopaedia / Wikimedia |
-| **Sagittal View** | Normal brain sagittal section. | [Direct Link](https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/MRI_of_human_brain.jpg/800px-MRI_of_human_brain.jpg) | NIH |
-| **Meningioma** | Axial T1 with contrast showing meningioma. | [Direct Link](https://upload.wikimedia.org/wikipedia/commons/e/e0/Meningioma-Contrast.jpg) | Radiopaedia |
-| **Pituitary Tumor** | Coronal view of pituitary adenoma. | [Direct Link](https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Pituitary_adenoma_mri.jpg/800px-Pituitary_adenoma_mri.jpg) | Case-Studies |
+## Clinical Datasets (Bulk Testing)
 
----
+For extensive validation, consider downloading slices from these official repositories:
 
-> [!TIP]
-> **For Advanced Testing (DICOM):**
-> If you have a DICOM viewer or want to test raw files, you can download sample datasets from [PhysioNet MRI Samples](https://physionet.org/content/mrisamples/1.0.0/).
+1.  **BraTS (Brain Tumor Segmentation)**: The gold standard for AI training.
+    *   [BraTS on TCIA](https://www.cancerimagingarchive.net/collection/brats/)
+2.  **OASIS (Open Access Series of Imaging Studies)**: Longitudinal MRI data.
+    *   [OASIS Brains](https://www.oasis-brains.org/)
+3.  **IXI Dataset**: Nearly 600 MR images from normal, healthy subjects.
+    *   [IXI Dataset](https://brain-development.org/ixi-dataset/)
+
+## Testing Protocol
+
+1.  **Baseline**: Upload a "Normal" T1/T2 scan. The Council should reach consensus on "Normal" pathology with high agreement.
+2.  **Pathology Stress Test**: Upload the Glioblastoma sample. Verify that:
+    *   **DenseNet** identifies High-Grade Glioma.
+    *   **Attention-Net** localizes the ROI in the correct hemisphere.
+    *   **Swin-UNETR** provides a volumetric estimation.
+3.  **Reporting**: Generate the PDF report after analysis and verify that all anatomical findings are correctly mapped to the clinical layout.

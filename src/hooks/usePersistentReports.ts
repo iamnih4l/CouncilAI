@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { CouncilConsensusResult } from '../services/inference/types';
+import { StorageService } from '../utils/storage';
 
 export interface PersistentReport {
   id: string;
@@ -9,24 +10,26 @@ export interface PersistentReport {
   result: CouncilConsensusResult;
 }
 
-const STORAGE_KEY = 'council_med_reports_vault';
-
 export function usePersistentReports() {
   const [reports, setReports] = useState<PersistentReport[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load reports on mount
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
+    const loadData = async () => {
       try {
-        setReports(JSON.parse(stored));
+        const stored = await StorageService.getReports();
+        setReports(stored);
       } catch (err) {
         console.error('Failed to parse diagnostic vault:', err);
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
+    loadData();
   }, []);
 
-  const addReport = useCallback((result: CouncilConsensusResult) => {
+  const addReport = useCallback(async (result: CouncilConsensusResult) => {
     const newReport: PersistentReport = {
       id: `PT-${Math.floor(Math.random() * 9000) + 1000}`,
       modality: 'MRI', // Default for now, can be parameterized
@@ -38,27 +41,21 @@ export function usePersistentReports() {
       result,
     };
 
-    setReports((prev) => {
-      const updated = [newReport, ...prev].slice(0, 50); // Cap at 50 for local storage efficiency
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      return updated;
-    });
+    await StorageService.saveReport(newReport);
+    setReports((prev) => [newReport, ...prev].slice(0, 100));
     
     return newReport;
   }, []);
 
-  const deleteReport = useCallback((id: string) => {
-    setReports((prev) => {
-      const updated = prev.filter(r => r.id !== id);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      return updated;
-    });
+  const deleteReport = useCallback(async (id: string) => {
+    await StorageService.deleteReport(id);
+    setReports((prev) => prev.filter(r => r.id !== id));
   }, []);
 
-  const clearAll = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
+  const clearAll = useCallback(async () => {
+    await StorageService.clearReports();
     setReports([]);
   }, []);
 
-  return { reports, addReport, deleteReport, clearAll };
+  return { reports, isLoading, addReport, deleteReport, clearAll };
 }

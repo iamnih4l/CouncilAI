@@ -2,7 +2,7 @@ import type {
   CouncilConsensusResult, 
   RadiologyReportData,
 } from '../inference/types';
-import { BRAIN_REGIONS } from '../inference/types';
+import { ALL_REGIONS } from '../inference/types';
 
 /**
  * Radiology Report Generator — CouncilAI
@@ -20,7 +20,7 @@ export class RadiologyReportGenerator {
     const dataQuality: RadiologyReportData['dataQuality'] = 'Adequate';
 
     // 2. Bone Parenchyma
-    const regionLabel = BRAIN_REGIONS[affectedRegion].label;
+    const regionLabel = ALL_REGIONS[affectedRegion]?.label || affectedRegion;
     let brainParenchyma = 'No definitive abnormal signal identified within limits of available data.';
     if (primaryDiagnosis !== 'Normal' && overallConfidence >= 60) {
       brainParenchyma = `Abnormal signal pattern detected within the ${regionLabel}.`;

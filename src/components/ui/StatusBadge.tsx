@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from './GlassCard';
+import { cn } from '../../utils/cn';
 import { AlertTriangle, CheckCircle, Info } from 'lucide-react';
 
 type StatusType = 'critical' | 'warning' | 'clear' | 'info';

@@ -9,12 +9,13 @@ import type {
   AttentionNetOutput,
   SwinUNETROutput,
   CouncilConsensusResult,
-  BrainRegionKey,
+  AnomalyRegionKey,
+  Modality,
 } from './types';
 import {
   PathologyClass,
   SeverityLevel,
-  BRAIN_REGIONS,
+  ALL_REGIONS,
 } from './types';
 
 // Model weights for the consensus (tunable based on validation performance)
@@ -103,13 +104,13 @@ function fuseAnomalyPosition(
 }
 
 /**
- * Determine the closest brain region to a given 3D position
+ * Determine the closest anomaly region to a given 3D position
  */
-function findClosestRegion(position: [number, number, number]): BrainRegionKey {
-  let closestRegion: BrainRegionKey = 'FRONTAL_LEFT';
+function findClosestRegion(position: [number, number, number]): AnomalyRegionKey {
+  let closestRegion: AnomalyRegionKey = 'FRONTAL_LEFT';
   let minDist = Infinity;
 
-  for (const [key, data] of Object.entries(BRAIN_REGIONS)) {
+  for (const [key, data] of Object.entries(ALL_REGIONS)) {
     const dist = Math.sqrt(
       (position[0] - data.center[0]) ** 2 +
       (position[1] - data.center[1]) ** 2 +
@@ -117,7 +118,7 @@ function findClosestRegion(position: [number, number, number]): BrainRegionKey {
     );
     if (dist < minDist) {
       minDist = dist;
-      closestRegion = key as BrainRegionKey;
+      closestRegion = key as AnomalyRegionKey;
     }
   }
 
@@ -145,7 +146,7 @@ function generateCouncilNotes(
   }
 
   // Spatial findings
-  const regionLabel = BRAIN_REGIONS[attention.focusRegion].label;
+  const regionLabel = ALL_REGIONS[attention.focusRegion]?.label || 'Unknown Region';
   notes.push(
     `Attention-Net localizes peak activation in the ${regionLabel} (confidence: ${attention.confidence.toFixed(1)}%).`
   );
@@ -188,7 +189,9 @@ function generateCouncilNotes(
 export function runCouncilConsensus(
   densenet: DenseNetOutput,
   attention: AttentionNetOutput,
-  swin: SwinUNETROutput
+  swin: SwinUNETROutput,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _modality: Modality = 'MRI'
 ): CouncilConsensusResult {
   // 1. Compute overall confidence (weighted)
   const overallConfidence =

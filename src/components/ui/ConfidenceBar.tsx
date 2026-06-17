@@ -1,4 +1,4 @@
-import { cn } from './GlassCard';
+import { cn } from '../../utils/cn';
 
 interface ConfidenceBarProps {
   score: number; // 0 to 100

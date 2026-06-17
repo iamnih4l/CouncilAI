@@ -20,9 +20,40 @@ export const BRAIN_REGIONS = {
 
 export type BrainRegionKey = keyof typeof BRAIN_REGIONS;
 
+export const TORSO_REGIONS = {
+  LIVER: { id: 10, label: 'Liver', center: [0.8, 0.5, 0] as [number, number, number] },
+  SPLEEN: { id: 11, label: 'Spleen', center: [-0.8, 0.5, -0.2] as [number, number, number] },
+  KIDNEY_LEFT: { id: 12, label: 'Left Kidney', center: [-0.6, 0, -0.5] as [number, number, number] },
+  KIDNEY_RIGHT: { id: 13, label: 'Right Kidney', center: [0.6, 0, -0.5] as [number, number, number] },
+  PANCREAS: { id: 14, label: 'Pancreas', center: [0, 0.2, -0.2] as [number, number, number] },
+  LOWER_ABDOMEN: { id: 15, label: 'Lower Abdomen', center: [0, -1.0, 0] as [number, number, number] },
+} as const;
+
+export type TorsoRegionKey = keyof typeof TORSO_REGIONS;
+
+export const SKELETON_REGIONS = {
+  TIBIA_PROXIMAL: { id: 20, label: 'Proximal Tibia', center: [0, 2.0, 0] as [number, number, number] },
+  TIBIA_DIAPHYSIS: { id: 21, label: 'Tibial Diaphysis', center: [0, 0, 0] as [number, number, number] },
+  TIBIA_DISTAL: { id: 22, label: 'Distal Tibia', center: [0, -2.0, 0] as [number, number, number] },
+  FIBULA: { id: 23, label: 'Fibula', center: [0.5, 0, 0] as [number, number, number] },
+} as const;
+
+export type SkeletonRegionKey = keyof typeof SKELETON_REGIONS;
+
+export type AnomalyRegionKey = BrainRegionKey | TorsoRegionKey | SkeletonRegionKey;
+
+export const ALL_REGIONS = {
+  ...BRAIN_REGIONS,
+  ...TORSO_REGIONS,
+  ...SKELETON_REGIONS,
+} as const;
+
+export type Modality = 'MRI' | 'CT' | 'XRAY';
+
 // --- Pathology Classification (WHO Grade I-IV compliant) ---
 
 export const PathologyClass = {
+  // MRI Brain
   NORMAL: 'Normal',
   MENINGIOMA: 'Meningioma (Grade I)',
   GLIOMA_LOW: 'Low-Grade Glioma (Grade II)',
@@ -31,6 +62,16 @@ export const PathologyClass = {
   METASTASIS: 'Metastatic Lesion',
   EDEMA: 'Peritumoral Edema',
   NECROSIS: 'Necrotic Core',
+  // CT Abdomen
+  CT_NORMAL: 'Clear / No Anomalies',
+  HEMORRHAGE: 'Hemorrhage / Bleeding',
+  TUMOR_ABDOMINAL: 'Abdominal Mass / Lesion',
+  ISCHEMIA: 'Ischemia / Infarction',
+  // XRay Bone
+  XRAY_NORMAL: 'No Fracture Detected',
+  FRACTURE_HAIRLINE: 'Hairline Fracture',
+  FRACTURE_COMPOUND: 'Compound Fracture',
+  JOINT_EFFUSION: 'Joint Effusion',
 } as const;
 
 export type PathologyClass = (typeof PathologyClass)[keyof typeof PathologyClass];
@@ -63,7 +104,7 @@ export interface DenseNetOutput {
 export interface AttentionNetOutput {
   modelName: 'Attention-Net';
   attentionMap: number[][]; // 2D spatial attention weights (normalized 0-1)
-  focusRegion: BrainRegionKey;
+  focusRegion: AnomalyRegionKey;
   focusCenter: [number, number, number]; // 3D coordinates of peak attention
   focusRadius: number; // Estimated radius of focus area
   confidence: number; // 0-100
@@ -94,9 +135,9 @@ export interface CouncilConsensusResult {
   overallConfidence: number; // 0-100 (weighted average)
 
   // Spatial findings (from Attention + Swin fusion)
-  anomalyPosition: [number, number, number]; // 3D coords for BrainModel
+  anomalyPosition: [number, number, number]; // 3D coords for BrainModel/TorsoModel/SkeletonModel
   anomalyRadius: number;
-  affectedRegion: BrainRegionKey;
+  affectedRegion: AnomalyRegionKey;
 
   // Individual model contributions
   densenetResult: DenseNetOutput;

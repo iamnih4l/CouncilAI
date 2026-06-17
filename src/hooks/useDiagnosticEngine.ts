@@ -4,14 +4,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { diagnosticEngine } from '../services/inference/DiagnosticEngine';
-import type { DiagnosticState, CouncilConsensusResult } from '../services/inference/types';
+import type { DiagnosticState, CouncilConsensusResult, Modality } from '../services/inference/types';
 
 interface UseDiagnosticEngineReturn {
   state: DiagnosticState;
   isInitialized: boolean;
   isProcessing: boolean;
   result: CouncilConsensusResult | null;
-  processImage: (file: File) => Promise<CouncilConsensusResult | void>;
+  processImage: (file: File, modality?: Modality) => Promise<CouncilConsensusResult | void>;
   reset: () => void;
   initialize: () => Promise<void>;
 }
@@ -36,9 +36,9 @@ export function useDiagnosticEngine(): UseDiagnosticEngineReturn {
     }
   }, []);
 
-  const processImage = useCallback(async (file: File) => {
+  const processImage = useCallback(async (file: File, modality: Modality = 'MRI') => {
     try {
-      return await diagnosticEngine.processImage(file);
+      return await diagnosticEngine.processImage(file, modality);
     } catch (err) {
       console.error('Diagnostic pipeline failed:', err);
     }

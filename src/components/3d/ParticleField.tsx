@@ -1,11 +1,13 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
 export default function ParticleField({ count = 2000 }) {
   const points = useRef<THREE.Points>(null);
 
-  const geometry = useMemo(() => {
+  const [geometry, setGeometry] = useState<THREE.BufferGeometry | null>(null);
+
+  useEffect(() => {
     const pos = new Float32Array(count * 3);
     const col = new Float32Array(count * 3);
     const colorOptions = [
@@ -32,15 +34,18 @@ export default function ParticleField({ count = 2000 }) {
     const geom = new THREE.BufferGeometry();
     geom.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     geom.setAttribute('color', new THREE.BufferAttribute(col, 3));
-    return geom;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setGeometry(geom);
   }, [count]);
 
   useFrame((state) => {
-    if (points.current) {
+    if (points.current && geometry) {
       points.current.rotation.y = state.clock.elapsedTime * 0.05;
       points.current.rotation.x = state.clock.elapsedTime * 0.02;
     }
   });
+
+  if (!geometry) return null;
 
   return (
     <points ref={points} geometry={geometry}>

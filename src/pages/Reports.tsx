@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { usePersistentReports } from '../hooks/usePersistentReports';
 
 export default function Reports() {
-  const { reports, deleteReport } = usePersistentReports();
+  const { reports, isLoading, deleteReport } = usePersistentReports();
 
   const handleDownload = async (reportId: string) => {
     // For a real app, we'd need to re-render the report or have it in a hidden div
@@ -52,6 +52,9 @@ export default function Reports() {
           </div>
           
           <div className="overflow-x-auto">
+            {isLoading ? (
+              <div className="w-full h-32 flex items-center justify-center text-zinc-400">Loading vault...</div>
+            ) : (
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-white/5 text-zinc-500 text-xs uppercase tracking-wider">
@@ -75,7 +78,7 @@ export default function Reports() {
                     <td className="px-4 py-4 text-sm text-zinc-300 font-medium">{report.modality} Analysis</td>
                     <td className="px-4 py-4 text-sm text-zinc-500">{report.date}</td>
                     <td className="px-4 py-4 text-sm">
-                      <StatusBadge status={report.result.severity as any}>
+                      <StatusBadge status={report.result.severity as 'critical' | 'warning' | 'clear' | 'info'}>
                         {report.result.primaryDiagnosis}
                       </StatusBadge>
                     </td>
@@ -105,6 +108,7 @@ export default function Reports() {
                 ))}
               </tbody>
             </table>
+            )}
           </div>
         </GlassCard>
 
@@ -115,10 +119,10 @@ export default function Reports() {
               <div>
                 <div className="flex justify-between text-xs mb-1">
                   <span className="text-zinc-500">DICOM Vault Usage</span>
-                  <span className="text-white">64.2%</span>
+                  <span className="text-white">IndexedDB (Safe)</span>
                 </div>
                 <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                  <div className="h-full bg-[var(--color-accent-cyan)] rounded-full w-[64.2%] transition-all"></div>
+                  <div className="h-full bg-[var(--color-accent-emerald)] rounded-full w-[10%] transition-all"></div>
                 </div>
               </div>
               <div className="pt-4 border-t border-white/10">
